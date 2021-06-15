@@ -1,6 +1,6 @@
 {
   "name": "@viacast/react-simple-timefield",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Simple React time input field",
   "author": "Gabriel Jablonski (https://github.com/gabrieljablonski)",
   "license": "MIT",
