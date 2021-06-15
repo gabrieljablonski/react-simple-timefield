@@ -15,6 +15,7 @@ export function formatTimeItem(value?: string | number): string {
 
 export function validateTimeAndCursor(
   showSeconds = false,
+  dontValidateHours = false,
   value = '',
   defaultValue = '',
   colon = DEFAULT_COLON,
@@ -25,16 +26,18 @@ export function validateTimeAndCursor(
   let newCursorPosition = Number(cursorPosition);
   let [newH, newM, newS] = String(value).split(colon);
 
-  newH = formatTimeItem(newH);
-  if (Number(newH[0]) > 2) {
-    newH = oldH;
-    newCursorPosition -= 1;
-  } else if (Number(newH[0]) === 2) {
-    if (Number(oldH[0]) === 2 && Number(newH[1]) > 3) {
-      newH = `2${oldH[1]}`;
-      newCursorPosition -= 2;
-    } else if (Number(newH[1]) > 3) {
-      newH = '23';
+  if (!dontValidateHours) {
+    newH = formatTimeItem(newH);
+    if (Number(newH[0]) > 2) {
+      newH = oldH;
+      newCursorPosition -= 1;
+    } else if (Number(newH[0]) === 2) {
+      if (Number(oldH[0]) === 2 && Number(newH[1]) > 3) {
+        newH = `2${oldH[1]}`;
+        newCursorPosition -= 2;
+      } else if (Number(newH[1]) > 3) {
+        newH = '23';
+      }
     }
   }
 
@@ -63,6 +66,7 @@ interface Props {
   value?: string;
   onChange?: onChangeType;
   showSeconds?: boolean;
+  dontValidateHours?: boolean;
   input: ReactElement | null;
   inputRef?: () => HTMLInputElement | null;
   colon?: string;
@@ -75,6 +79,7 @@ interface State {
   _defaultValue: string;
   _showSeconds: boolean;
   _maxLength: number;
+  _dontValidateHours: boolean;
 }
 
 export default class TimeField extends React.Component<Props, State> {
@@ -82,21 +87,30 @@ export default class TimeField extends React.Component<Props, State> {
     showSeconds: false,
     input: null,
     style: {},
-    colon: DEFAULT_COLON
+    colon: DEFAULT_COLON,
+    dontValidateHours: true
   };
 
   constructor(props: Props) {
     super(props);
 
     const _showSeconds = Boolean(props.showSeconds);
+    const _dontValidateHours = Boolean(props.dontValidateHours);
     const _defaultValue = _showSeconds ? DEFAULT_VALUE_FULL : DEFAULT_VALUE_SHORT;
     const _colon = props.colon && props.colon.length === 1 ? props.colon : DEFAULT_COLON;
-    const [validatedTime] = validateTimeAndCursor(_showSeconds, this.props.value, _defaultValue, _colon);
+    const [validatedTime] = validateTimeAndCursor(
+      _showSeconds,
+      _dontValidateHours,
+      this.props.value,
+      _defaultValue,
+      _colon
+    );
 
     this.state = {
       value: validatedTime,
       _colon,
       _showSeconds,
+      _dontValidateHours: _dontValidateHours,
       _defaultValue,
       _maxLength: _defaultValue.length
     };
@@ -108,6 +122,7 @@ export default class TimeField extends React.Component<Props, State> {
     if (this.props.value !== prevProps.value) {
       const [validatedTime] = validateTimeAndCursor(
         this.state._showSeconds,
+        this.state._dontValidateHours,
         this.props.value,
         this.state._defaultValue,
         this.state._colon
@@ -180,6 +195,7 @@ export default class TimeField extends React.Component<Props, State> {
 
     const [validatedTime, validatedCursorPosition] = validateTimeAndCursor(
       this.state._showSeconds,
+      this.state._dontValidateHours,
       newValue,
       oldValue,
       colon,
