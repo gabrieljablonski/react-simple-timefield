@@ -88,7 +88,7 @@ export default class TimeField extends React.Component<Props, State> {
     input: null,
     style: {},
     colon: DEFAULT_COLON,
-    dontValidateHours: true
+    dontValidateHours: false
   };
 
   constructor(props: Props) {
